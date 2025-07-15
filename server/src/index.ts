@@ -1,12 +1,19 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import resumeRoutes from './routes/resumeRoutes';
 
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite default port
+  credentials: true
+}));
+
 app.use(express.json());
+
+app.use('/api/resume', resumeRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
