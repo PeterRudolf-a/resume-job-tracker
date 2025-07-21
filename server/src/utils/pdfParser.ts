@@ -1,21 +1,39 @@
-import fs from 'fs';
-import pdfParse from 'pdf-parse';
+import fs from "fs";
+import pdfParse from "pdf-parse";
+
+const extractSection = (text: string, keywords: string[]) => {
+  const lower = text.toLowerCase();
+  for (let keyword of keywords) {
+    const startIndex = lower.indexOf(keyword.toLowerCase());
+    if (startIndex !== -1) {
+      const nextHeaderIndex = lower
+        .slice(startIndex + keyword.length)
+        .search(/\n[A-Z]/);
+      return text
+        .slice(startIndex, startIndex + keyword.length + nextHeaderIndex)
+        .trim();
+    }
+  }
+  return null;
+};
 
 export const parseResume = async (filePath: string) => {
   const buffer = fs.readFileSync(filePath);
   const data = await pdfParse(buffer);
-  const rawText = data.text;
-
-  // Extract structured info (basic version)
-  const skillsMatch = rawText.match(/Skills[\s\S]*?(?=\n[A-Z])/i);
-  const educationMatch = rawText.match(/Education[\s\S]*?(?=\n[A-Z])/i);
-  const experienceMatch = rawText.match(/(Experience|Employment History)[\s\S]*?(?=\n[A-Z])/i);
+  const text = data.text;
 
   return {
-    rawText,
-    skills: skillsMatch ? skillsMatch[0].trim() : null,
-    education: educationMatch ? educationMatch[0].trim() : null,
-    experience: experienceMatch ? experienceMatch[0].trim() : null,
+    rawText: text,
+    skills: extractSection(text, [
+      "skills",
+      "technical skills",
+      "technologies",
+    ]),
+    experience: extractSection(text, [
+      "experience",
+      "work history",
+      "employment",
+    ]),
+    education: extractSection(text, ["education", "academic"]),
   };
 };
-

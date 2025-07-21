@@ -4,3 +4,4 @@ dist/
 coverage/
 # Resume uploads (temp)
 src/uploads/
+package-lock.json
