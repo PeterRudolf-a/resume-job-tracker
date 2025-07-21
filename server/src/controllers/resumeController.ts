@@ -1,17 +1,19 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { parseResume } from '../utils/pdfParser';
-import path from 'path';
+import { Resume } from '../models/Resume';
 
-export const uploadResume = async (req: Request, res: Response) => {
+export const uploadResume = async (req: any, res: Response) => {
   try {
     const file = req.file;
     if (!file) return res.status(400).json({ message: 'No file uploaded' });
 
     const parsed = await parseResume(file.path);
-    res.status(200).json(parsed);
+    const userId = req.user?.id;
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error parsing resume' });
+    const saved = await Resume.create({ ...parsed, userId });
+    res.status(201).json(saved);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error uploading resume' });
   }
 };
