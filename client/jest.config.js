@@ -1,5 +1,11 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
+  preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest',
+  },
 };
+
