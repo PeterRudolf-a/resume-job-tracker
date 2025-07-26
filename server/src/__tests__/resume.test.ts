@@ -14,7 +14,7 @@ app.use("/api/resume", resumeRoutes);
 const mockUserId = new Types.ObjectId();
 
 // Inline mock for auth middleware
-jest.mock("../../middleware/auth", () => ({
+jest.mock("../middleware/auth", () => ({
   authMiddleware: (req: any, res: any, next: any) => {
     req.user = { id: mockUserId.toString() };
     next();
