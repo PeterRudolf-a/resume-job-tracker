@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, development ]
+    branches: [ development ]
   pull_request:
-    branches: [ main, development ]
+    branches: [ development ]
 
 jobs:
   test:
@@ -15,6 +15,11 @@ jobs:
         image: mongo
         ports:
           - 27017:27017
+        options: >-
+          --health-cmd="mongo --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - uses: actions/checkout@v3
@@ -24,13 +29,25 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Wait for MongoDB to be ready
         run: |
-          cd client && npm ci
-          cd ../server && npm ci
+          until nc -z localhost 27017; do
+            echo "Waiting for MongoDB..."
+            sleep 1
+          done
 
       - name: Run backend tests
-        run: cd server && npm test
+        working-directory: server
+        run: npm test
 
       - name: Run frontend tests
-        run: cd client && npm test -- --watchAll=false
+        working-directory: client
+        run: npm test -- --config=jest.config.cjs --watchAll=false
