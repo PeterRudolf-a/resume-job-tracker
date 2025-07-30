@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import ResumeCard from "../components/ResumeCard";
+import Spinner from "../components/Spinner";
 
 type Resume = {
   _id: string;
@@ -39,7 +41,7 @@ const SavedResumes = () => {
     fetchResumes();
   }, []);
 
-  if (loading) return <p className="p-4">Loading...</p>;
+  if (loading) return <Spinner />;
   if (error) return <p className="text-red-500 p-4">{error}</p>;
 
   return (
@@ -47,51 +49,14 @@ const SavedResumes = () => {
       <h1 className="text-2xl font-bold mb-4">Saved Resumes</h1>
 
       {resumes.map((resume) => (
-        <div key={resume._id} className="border p-4 rounded shadow-sm bg-white">
-          <p className="text-sm text-gray-500 mb-2">
-            Uploaded: {new Date(resume.uploadedAt).toLocaleString()}
-          </p>
-
-          <div className="space-y-2">
-            <div>
-              <h2 className="font-semibold">Skills</h2>
-              <p className="bg-gray-50 p-2 rounded">
-                {resume.skills || "Not found"}
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-semibold">Education</h2>
-              <p className="bg-gray-50 p-2 rounded">
-                {resume.education || "Not found"}
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-semibold">Experience</h2>
-              <p className="bg-gray-50 p-2 rounded">
-                {resume.experience || "Not found"}
-              </p>
-            </div>
-
-            <button
-              onClick={() =>
-                setShowRaw(showRaw === resume._id ? null : resume._id)
-              }
-              className="text-blue-500 underline text-sm mt-2"
-            >
-              {showRaw === resume._id
-                ? "Hide full text"
-                : "Show full resume text"}
-            </button>
-
-            {showRaw === resume._id && (
-              <pre className="bg-gray-100 text-sm p-2 mt-2 overflow-auto rounded whitespace-pre-wrap">
-                {resume.rawText}
-              </pre>
-            )}
-          </div>
-        </div>
+        <ResumeCard
+          key={resume._id}
+          {...resume}
+          showRaw={showRaw === resume._id}
+          toggleRaw={() =>
+            setShowRaw((prev) => (prev === resume._id ? null : resume._id))
+          }
+        />
       ))}
     </div>
   );
