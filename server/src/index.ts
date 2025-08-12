@@ -1,27 +1,24 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import resumeRoutes from './routes/resumeRoutes';
-import authRoutes from './routes/authRoutes';
+import express from "express";
+import dotenv from "dotenv";
+import path from "path";
+import { connectDB } from "./config/db";
+import resumeRoutes from "./routes/resumeRoutes";
+import authRoutes from "./routes/authRoutes"; // if implemented
+import mongoose from "mongoose";
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "../.env") });
+connectDB();
+
 const app = express();
-
-app.use(cors({
-  origin: 'http://localhost:5173', // Vite default port
-  credentials: true
-}));
-
 app.use(express.json());
 
-app.use('/api/resume', resumeRoutes);
-app.use('/api/auth', authRoutes);
-
-app.get('/', (req, res) => {
-  res.send('API is running...');
+// Health check for DB status
+app.get("/api/health", (_, res) => {
+  res.json({ status: "ok", db: mongoose.connection.readyState });
 });
+
+app.use("/api/resume", resumeRoutes);
+app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
